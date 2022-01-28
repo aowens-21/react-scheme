@@ -1,4 +1,4 @@
-import { parseProgram } from "./Repl";
+import { parseProgram, interp } from "./Repl";
 import { ExprType } from './Language';
 
 test('parse addition', ()=> {
@@ -47,5 +47,27 @@ test('parse a single number', ()=> {
 test('throw an error when given an incomplete expression', ()=> {
     expect(()=> {
         parseProgram('  (+ ) ');
+    }).toThrow();
+});
+
+test('interpret simple addition', ()=> {
+    const program = parseProgram('(+ 1 2)');
+    expect(interp(program) === 3);
+});
+
+test('interpret simple subtraction', ()=> {
+    const program = parseProgram('(- 15 2)');
+    expect(interp(program) === 13);
+});
+
+test('interpret nested arithmetic operations', ()=> {
+    const program = parseProgram('(+ (+ 1 2) (- 2 4))');
+    expect(interp(program) === 1);
+});
+
+test ('error when giving wrong arity to add', ()=> {
+    const program = parseProgram('(+ 1)');
+    expect(()=> {
+        interp(program);
     }).toThrow();
 })

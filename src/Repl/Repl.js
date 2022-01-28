@@ -1,5 +1,5 @@
 import React from "react";
-import { Instruction, ExprType } from "./Language";
+import { ExprType } from "./Language";
 
 export default class Repl extends React.Component {
     constructor(props) {
@@ -9,11 +9,17 @@ export default class Repl extends React.Component {
         }
 
         this.handleInput = this.handleInput.bind(this);
+        this.evalProgram = this.evalProgram.bind(this);
+    }
+
+    evalProgram() {
+        const text = this.state.programText;
+        const parsed = parseProgram(text);
+        console.log(interp(parsed));
     }
 
     handleInput(event) {
         this.setState({ programText: event.target.value });
-        parseProgram(event.target.value);
     }
 
     render() {
@@ -24,6 +30,7 @@ export default class Repl extends React.Component {
                 placeholder="Enter Scheme Code Here"
                 value={this.state.programText}
                 onChange={this.handleInput}
+                onKeyPress={this.evalProgram}
             />
         )
     }
@@ -72,7 +79,19 @@ export function parseProgram(programText) {
         
         switch (unparsedSubExprs[0]) {
             case '+':
-                
+                return {
+                    type: ExprType.Add,
+                    expr1: parseProgram(unparsedSubExprs[1]),
+                    expr2: parseProgram(unparsedSubExprs[2])
+                };
+            case '-':
+                return {
+                    type: ExprType.Sub,
+                    expr1: parseProgram(unparsedSubExprs[1]),
+                    expr2: parseProgram(unparsedSubExprs[2])
+                };
+            default:
+                throw new Error("Operation not supported: " + unparsedSubExprs[0]);
         }
 
     } else {
@@ -103,4 +122,8 @@ function findMatchingParen(openPos, str) {
     }
 
     return false;
+}
+
+function interp(program) {
+    
 }
