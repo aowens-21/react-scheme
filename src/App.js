@@ -1,5 +1,5 @@
 import './App.css';
-import Repl from './Repl.js';
+import Repl from './Repl/Repl.js';
 
 export default function App() {
     return (
