@@ -1,4 +1,5 @@
 import React from "react";
+import { Instruction, OpType } from "./Language";
 
 export default class Repl extends React.Component {
     constructor(props) {
@@ -28,6 +29,7 @@ export default class Repl extends React.Component {
     }
 }
 
-function parseProgram(programText) {
-    
+export function parseProgram(programText) {
+    const trimmedProgram = programText.trim();
+    throw "Not implemented";
 }
