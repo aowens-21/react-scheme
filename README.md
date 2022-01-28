@@ -1,2 +1,2 @@
 # react-scheme
-An in browser Scheme interpreter written in React
+An in browser interpreter for a Scheme-like language written in React
