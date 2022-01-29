@@ -5,17 +5,22 @@ export default class Repl extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            programText: ''
+            programText: '',
+            result: null
         }
 
         this.handleInput = this.handleInput.bind(this);
         this.evalProgram = this.evalProgram.bind(this);
     }
 
-    evalProgram() {
-        const text = this.state.programText;
-        const parsed = parseProgram(text);
-        console.log(interp(parsed));
+    evalProgram(event) {
+        if (event.key === 'Enter') {
+            const text = this.state.programText;
+            const parsed = parseProgram(text);
+            const result = interp(parsed);
+            console.log(result);
+            this.setState({ result });
+        }
     }
 
     handleInput(event) {
@@ -24,19 +29,26 @@ export default class Repl extends React.Component {
 
     render() {
         return (
-            <input 
-                type="text" 
-                className="replInput" 
-                placeholder="Enter Scheme Code Here"
-                value={this.state.programText}
-                onChange={this.handleInput}
-                onKeyPress={this.evalProgram}
-            />
+            <div className="replContainer">
+                <input 
+                    type="text" 
+                    className="replInput" 
+                    placeholder="Enter Scheme Code Here"
+                    value={this.state.programText}
+                    onChange={this.handleInput}
+                    onKeyPress={this.evalProgram}
+                />
+                <p>{this.state.result}</p>
+            </div>
         )
     }
 }
 
 export function parseProgram(programText) {
+    if (typeof(programText) === 'undefined') {
+        throw new Error('incomplete program!');
+    }
+
     const trimmedProgram = programText.trim();
     
     // find the first non-whitespace char
@@ -90,6 +102,12 @@ export function parseProgram(programText) {
                     expr1: parseProgram(unparsedSubExprs[1]),
                     expr2: parseProgram(unparsedSubExprs[2])
                 };
+            case '*':
+                return {
+                    type: ExprType.Mult,
+                    expr1: parseProgram(unparsedSubExprs[1]),
+                    expr2: parseProgram(unparsedSubExprs[2])
+                };
             default:
                 throw new Error("Operation not supported: " + unparsedSubExprs[0]);
         }
@@ -124,6 +142,19 @@ function findMatchingParen(openPos, str) {
     return false;
 }
 
-function interp(program) {
-    
+export function interp(program) {
+    const t = program.type;
+
+    switch (t) {
+        case ExprType.Num:
+            return program.value;
+        case ExprType.Add:
+            return interp(program.expr1) + interp(program.expr2);
+        case ExprType.Sub:
+            return interp(program.expr1) - interp(program.expr2);
+        case ExprType.Mult:
+            return interp(program.expr1) * interp(program.expr2);
+        default:
+            throw new Error('Unsupported expression type: ' + t);
+    }
 }

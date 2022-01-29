@@ -50,6 +50,11 @@ test('throw an error when given an incomplete expression', ()=> {
     }).toThrow();
 });
 
+test('interpret a number', ()=> {
+    const program = parseProgram('    5     \n');
+    expect(interp(program) === 5);
+});
+
 test('interpret simple addition', ()=> {
     const program = parseProgram('(+ 1 2)');
     expect(interp(program) === 3);
@@ -66,8 +71,12 @@ test('interpret nested arithmetic operations', ()=> {
 });
 
 test ('error when giving wrong arity to add', ()=> {
-    const program = parseProgram('(+ 1)');
     expect(()=> {
-        interp(program);
+        const program = parseProgram('(+ 1)');
     }).toThrow();
-})
+});
+
+test('interpret a multiplication', ()=> {
+    const program = parseProgram('(* 2 6)');
+    expect(interp(program) === 12);
+});
