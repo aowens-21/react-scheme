@@ -31,3 +31,16 @@
 .repl input:focus {
   outline: none;
 }
+
+.results {
+  text-align: center;
+}
+
+.results li {
+  list-style: none;
+}
+
+.historyItem {
+  display: flex;
+  justify-content: space-between;
+}

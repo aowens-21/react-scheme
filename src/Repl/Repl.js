@@ -6,7 +6,7 @@ export default class Repl extends React.Component {
         super(props);
         this.state = {
             programText: '',
-            result: null
+            resultHistory: []
         }
 
         this.handleInput = this.handleInput.bind(this);
@@ -18,8 +18,17 @@ export default class Repl extends React.Component {
             const text = this.state.programText;
             const parsed = parseProgram(text);
             const result = interp(parsed);
-            console.log(result);
-            this.setState({ result });
+
+            const history = this.state.resultHistory;
+            history.push({
+                text,
+                result
+            });
+
+            this.setState({ 
+                resultHistory: history,
+                programText: ''
+            });
         }
     }
 
@@ -28,8 +37,21 @@ export default class Repl extends React.Component {
     }
 
     render() {
+        let history = this.state.resultHistory;
+
+        if (history.length !== 0) {
+            history = history.map((h)=> {
+                return (
+                    <li className="historyItem"><p>{h.text}</p> <p>==&gt;</p> <p>{h.result}</p></li>
+                )
+            })
+        }
+
         return (
             <div className="replContainer">
+                <ul className="results">
+                    {history}
+                </ul>
                 <input 
                     type="text" 
                     className="replInput" 
@@ -38,7 +60,6 @@ export default class Repl extends React.Component {
                     onChange={this.handleInput}
                     onKeyPress={this.evalProgram}
                 />
-                <p>{this.state.result}</p>
             </div>
         )
     }
