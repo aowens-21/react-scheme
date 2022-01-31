@@ -42,7 +42,7 @@ export default class Repl extends React.Component {
         if (history.length !== 0) {
             history = history.map((h)=> {
                 return (
-                    <li className="historyItem"><p>{h.text}</p> <p>==&gt;</p> <p>{h.result}</p></li>
+                    <li className="historyItem"><p>{h.text}</p><p>==&gt; {h.result}</p></li>
                 )
             });
 
@@ -58,7 +58,7 @@ export default class Repl extends React.Component {
                 <input 
                     type="text" 
                     className="replInput" 
-                    placeholder="Enter Scheme Code Here"
+                    placeholder="..."
                     value={this.state.programText}
                     onChange={this.handleInput}
                     onKeyPress={this.evalProgram}
