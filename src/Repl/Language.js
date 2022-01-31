@@ -2,7 +2,9 @@ const ExprType = {
     Add: 'Add',
     Sub: 'Sub',
     Mult: 'Mult',
-    Num: 'Num'
+    Num: 'Num',
+    Symbol: 'Symbol',
+    Let: 'Let'
 };
 
 export { ExprType };

@@ -80,3 +80,26 @@ test('interpret a multiplication', ()=> {
     const program = parseProgram('(* 2 6)');
     expect(interp(program) === 12);
 });
+
+test('parse a symbol', ()=> {
+    const p = parseProgram('\'10');
+    expect(p === {
+        type: ExprType.Symbol,
+        value: '\'10'
+    });
+});
+
+test('interpret a symbol', ()=> {
+    const p = parseProgram('\'hello');
+    expect(interp(p) === '\'hello');
+});
+
+test('intepret a let expression', ()=> {
+    const p = parseProgram('(let ((x 5)) (* x x))');
+    expect(interp(p) === 25);
+});
+
+test('interpet let with multiple ids', ()=> {
+    const p = parseProgram('(let ((x 5) (y 10)) (+ x y))');
+    expect(interp(p) === 15);
+});

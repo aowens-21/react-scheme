@@ -44,14 +44,17 @@ export default class Repl extends React.Component {
                 return (
                     <li className="historyItem"><p>{h.text}</p> <p>==&gt;</p> <p>{h.result}</p></li>
                 )
-            })
+            });
+
+            history = 
+                <ul className="results">
+                    {history}
+                </ul>
         }
 
         return (
             <div className="replContainer">
-                <ul className="results">
-                    {history}
-                </ul>
+                {history}
                 <input 
                     type="text" 
                     className="replInput" 
@@ -129,10 +132,21 @@ export function parseProgram(programText) {
                     expr1: parseProgram(unparsedSubExprs[1]),
                     expr2: parseProgram(unparsedSubExprs[2])
                 };
+            case 'let':
+                return  {
+                    type: ExprType.Let,
+                    bindingPairs: parseLetBindings(unparsedSubExprs[1]),
+                    body: parseProgram(unparsedSubExprs[2])
+                };
             default:
                 throw new Error("Operation not supported: " + unparsedSubExprs[0]);
         }
 
+    } else if (trimmedProgram[0] === '\'') {
+        return {
+            type: ExprType.Symbol,
+            value: trimmedProgram
+        };
     } else {
         const pAsNumber = parseInt(trimmedProgram);
 
@@ -145,6 +159,10 @@ export function parseProgram(programText) {
 
         throw new Error('Invalid program: ' + trimmedProgram);
     }   
+}
+
+function parseLetBindings(bindingPairsString) {
+    
 }
 
 function findMatchingParen(openPos, str) {
@@ -175,6 +193,8 @@ export function interp(program) {
             return interp(program.expr1) - interp(program.expr2);
         case ExprType.Mult:
             return interp(program.expr1) * interp(program.expr2);
+        case ExprType.Symbol:
+            return program.value;
         default:
             throw new Error('Unsupported expression type: ' + t);
     }

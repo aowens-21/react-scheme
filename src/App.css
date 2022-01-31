@@ -14,7 +14,7 @@
 }
 
 .repl {
-  flex: 2 1 0;
+  flex: 4 1 0;
   width: 80vw;
 }
 
@@ -34,6 +34,10 @@
 
 .results {
   text-align: center;
+  height: 300px;
+  overflow: scroll;
+  border: 1px solid #acaeb3;
+  padding: 20px; 
 }
 
 .results li {
@@ -42,5 +46,5 @@
 
 .historyItem {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
 }
