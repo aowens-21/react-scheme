@@ -4,7 +4,8 @@ const ExprType = {
     Mult: 'Mult',
     Num: 'Num',
     Symbol: 'Symbol',
-    Let: 'Let'
+    Let: 'Let',
+    Id: 'Id'
 };
 
 export { ExprType };

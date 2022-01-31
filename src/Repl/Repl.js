@@ -17,7 +17,7 @@ export default class Repl extends React.Component {
         if (event.key === 'Enter') {
             const text = this.state.programText;
             const parsed = parseProgram(text);
-            const result = interp(parsed);
+            const result = interp(parsed, {});
 
             const history = this.state.resultHistory;
             history.push({
@@ -155,14 +155,59 @@ export function parseProgram(programText) {
                 type: ExprType.Num,
                 value: pAsNumber
             };
-        }
+        } 
 
-        throw new Error('Invalid program: ' + trimmedProgram);
+        // Assume it's some ID
+        return {
+            type: ExprType.Id,
+            name: trimmedProgram
+        };
     }   
 }
 
 function parseLetBindings(bindingPairsString) {
-    
+    let unparsedSubExprs = [];
+    let currentSubExpr = '';
+    let i = 1;
+
+    while (i < bindingPairsString.length) {
+        if (bindingPairsString[i] === '(') {
+            const closingParenPos = findMatchingParen(i, bindingPairsString);
+            
+            if (closingParenPos) {
+                unparsedSubExprs.push(bindingPairsString.substring(i, closingParenPos + 1));
+                currentSubExpr = '';
+                i = closingParenPos + 1;
+            } else {
+                throw new Error('Unbalanced parens!');
+            }
+        } else if (bindingPairsString[i] !== ' ' && bindingPairsString[i] !== '\n' && bindingPairsString[i] !== '\t') {
+            currentSubExpr += bindingPairsString[i];
+            i++;
+        } else {
+            unparsedSubExprs.push(currentSubExpr);
+            currentSubExpr = '';
+            i++;
+        }
+    }
+
+    unparsedSubExprs.push(currentSubExpr.substring(0, currentSubExpr.length - 1));
+        unparsedSubExprs = unparsedSubExprs.filter((e)=> {
+            return e !== '';
+        });
+
+    // create a list of pairs where each pair is a name
+    // mapping to a parsed expression
+    return unparsedSubExprs.map((pairStr)=> {
+        // gets a pair with name and named subexpression as a string
+        const pieces = pairStr.substring(1, pairStr.length - 1).split(/\s/).filter((s)=> { return s !== ''; });
+        const name = pieces.shift();
+        const subExpr = pieces.join(' ');
+        const parsedNamedSubExpr = parseProgram(subExpr);
+        return [name, parsedNamedSubExpr];
+    });
+
+
 }
 
 function findMatchingParen(openPos, str) {
@@ -181,20 +226,47 @@ function findMatchingParen(openPos, str) {
     return false;
 }
 
-export function interp(program) {
+function lookupName(bindings, name) {
+    const bindingList = bindings[name];
+    
+    if (bindingList) {
+        return bindingList[0];
+    }
+
+    throw new Error('Unbound identifier: ' + name);
+}
+
+function addBindings(bindings, pairs) {
+    for (const pair of pairs) {
+        const existingBinding = bindings[pair[0]];
+        const newVal = interp(pair[1], bindings);
+        if (existingBinding) {
+            bindings[pair[0]].unshift(newVal);
+        } else {
+            bindings[pair[0]] = [newVal];
+        }
+    }
+}
+
+export function interp(program, bindings) {
     const t = program.type;
 
     switch (t) {
         case ExprType.Num:
             return program.value;
         case ExprType.Add:
-            return interp(program.expr1) + interp(program.expr2);
+            return interp(program.expr1, bindings) + interp(program.expr2, bindings);
         case ExprType.Sub:
-            return interp(program.expr1) - interp(program.expr2);
+            return interp(program.expr1, bindings) - interp(program.expr2, bindings);
         case ExprType.Mult:
-            return interp(program.expr1) * interp(program.expr2);
+            return interp(program.expr1, bindings) * interp(program.expr2, bindings);
         case ExprType.Symbol:
             return program.value;
+        case ExprType.Id:
+            return lookupName(bindings, program.name);
+        case ExprType.Let:
+            addBindings(bindings, program.bindingPairs);
+            return interp(program.body, bindings);
         default:
             throw new Error('Unsupported expression type: ' + t);
     }
